@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Personal Expense Tracker</h1>
+
+  <!-- Part 1: Form to add an expense -->
+  <form id="expense-form">
+    <input type="text" id="title" placeholder="What did you spend on?" required>
+    <input type="number" id="amount" placeholder="Amount (₹)" required>
+
+    <select id="category" required>
+      <option value="">Choose category</option>
+      <option value="Food">Food</option>
+      <option value="Travel">Travel</option>
+      <option value="Shopping">Shopping</option>
+      <option value="Bills">Bills</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <input type="date" id="date" required>
+    <button type="submit">Add Expense</button>
+  </form>
+
+  <!-- Part 2: Total spent -->
+  <h2>Total Spent: ₹<span id="total">0</span></h2>
+
+  <!-- Part 3: List of expenses -->
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Category</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="expense-list">
+      <!-- Expenses will appear here later -->
+    </tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>
