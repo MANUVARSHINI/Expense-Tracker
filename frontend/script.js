@@ -1,3 +1,6 @@
+// The address of your Flask server
+const API_URL = "http://127.0.0.1:5000/expenses";
+
 // ---------- 1. Find the elements on the page ----------
 const form = document.getElementById("expense-form");
 const titleInput = document.getElementById("title");
@@ -7,15 +10,15 @@ const dateInput = document.getElementById("date");
 const expenseList = document.getElementById("expense-list");
 const totalDisplay = document.getElementById("total");
 
-// ---------- 2. Load saved expenses (or start with an empty list) ----------
-let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+// ---------- 2. Get expenses from the server and show them ----------
+async function loadExpenses() {
+  const response = await fetch(API_URL);
+  const expenses = await response.json();
 
-// ---------- 3. Show everything on the page ----------
-function showExpenses() {
-  expenseList.innerHTML = "";   // clear the table first
+  expenseList.innerHTML = "";
   let total = 0;
 
-  expenses.forEach(function (expense, index) {
+  expenses.forEach(function (expense) {
     total += expense.amount;
 
     const row = document.createElement("tr");
@@ -24,7 +27,7 @@ function showExpenses() {
       <td>${expense.category}</td>
       <td>${expense.date}</td>
       <td>₹${expense.amount}</td>
-      <td><button onclick="deleteExpense(${index})">Delete</button></td>
+      <td><button onclick="deleteExpense(${expense.id})">Delete</button></td>
     `;
     expenseList.appendChild(row);
   });
@@ -32,9 +35,9 @@ function showExpenses() {
   totalDisplay.textContent = total;
 }
 
-// ---------- 4. Add a new expense when the form is submitted ----------
-form.addEventListener("submit", function (event) {
-  event.preventDefault();   // stop the page from reloading
+// ---------- 3. Send a new expense to the server ----------
+form.addEventListener("submit", async function (event) {
+  event.preventDefault();
 
   const newExpense = {
     title: titleInput.value,
@@ -43,19 +46,21 @@ form.addEventListener("submit", function (event) {
     date: dateInput.value
   };
 
-  expenses.push(newExpense);
-  localStorage.setItem("expenses", JSON.stringify(expenses));
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newExpense)
+  });
 
-  showExpenses();
-  form.reset();   // clear the form fields
+  form.reset();
+  loadExpenses();
 });
 
-// ---------- 5. Delete an expense ----------
-function deleteExpense(index) {
-  expenses.splice(index, 1);   // remove 1 item at this position
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-  showExpenses();
+// ---------- 4. Ask the server to delete an expense ----------
+async function deleteExpense(id) {
+  await fetch(API_URL + "/" + id, { method: "DELETE" });
+  loadExpenses();
 }
 
-// ---------- 6. Show saved expenses when the page first opens ----------
-showExpenses();
+// ---------- 5. Load expenses when the page first opens ----------
+loadExpenses();
