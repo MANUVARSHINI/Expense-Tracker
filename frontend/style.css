@@ -106,3 +106,31 @@ tr:hover {
 #export-btn:hover {
   background-color: #1f6391;
 }
+
+/* ---------- Month filter ---------- */
+.filter-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.filter-box input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+#clear-filter {
+  padding: 8px 15px;
+  background-color: #7f8c8d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#clear-filter:hover {
+  background-color: #636e72;
+}

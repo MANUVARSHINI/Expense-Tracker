@@ -9,20 +9,34 @@ const dateInput = document.getElementById("date");
 const expenseList = document.getElementById("expense-list");
 const totalDisplay = document.getElementById("total");
 const exportBtn = document.getElementById("export-btn");
+const monthFilter = document.getElementById("month-filter");
+const clearFilter = document.getElementById("clear-filter");
 
-// These two are used by the chart and the export
+// allExpenses = everything from the server
+// visibleExpenses = only what passes the month filter
 let allExpenses = [];
+let visibleExpenses = [];
 let categoryChart = null;
 
-// ---------- 2. Get expenses from the server and show them ----------
+// ---------- 2. Get all expenses from the server ----------
 async function loadExpenses() {
   const response = await fetch(API_URL);
   allExpenses = await response.json();
+  showExpenses();
+}
+
+// ---------- 3. Apply the filter and show the results ----------
+function showExpenses() {
+  const month = monthFilter.value;   // looks like "2026-10", or empty
+
+  visibleExpenses = allExpenses.filter(function (expense) {
+    return !month || expense.date.startsWith(month);
+  });
 
   expenseList.innerHTML = "";
   let total = 0;
 
-  allExpenses.forEach(function (expense) {
+  visibleExpenses.forEach(function (expense) {
     total += expense.amount;
 
     const row = document.createElement("tr");
@@ -40,15 +54,13 @@ async function loadExpenses() {
   drawChart();
 }
 
-// ---------- 3. Draw the pie chart ----------
+// ---------- 4. Draw the pie chart ----------
 function drawChart() {
-  // Add up the amount for each category
   const totals = {};
-  allExpenses.forEach(function (expense) {
+  visibleExpenses.forEach(function (expense) {
     totals[expense.category] = (totals[expense.category] || 0) + expense.amount;
   });
 
-  // If a chart already exists, remove it before drawing a new one
   if (categoryChart) {
     categoryChart.destroy();
   }
@@ -66,7 +78,7 @@ function drawChart() {
   });
 }
 
-// ---------- 4. Send a new expense to the server ----------
+// ---------- 5. Send a new expense to the server ----------
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
@@ -87,21 +99,29 @@ form.addEventListener("submit", async function (event) {
   loadExpenses();
 });
 
-// ---------- 5. Delete an expense ----------
+// ---------- 6. Delete an expense ----------
 async function deleteExpense(id) {
   await fetch(API_URL + "/" + id, { method: "DELETE" });
   loadExpenses();
 }
 
-// ---------- 6. Download expenses as a CSV file ----------
+// ---------- 7. Month filter controls ----------
+monthFilter.addEventListener("change", showExpenses);
+
+clearFilter.addEventListener("click", function () {
+  monthFilter.value = "";
+  showExpenses();
+});
+
+// ---------- 8. Download the visible expenses as CSV ----------
 exportBtn.addEventListener("click", function () {
-  if (allExpenses.length === 0) {
+  if (visibleExpenses.length === 0) {
     alert("No expenses to export yet!");
     return;
   }
 
   let csv = "Title,Category,Date,Amount\n";
-  allExpenses.forEach(function (expense) {
+  visibleExpenses.forEach(function (expense) {
     const safeTitle = '"' + expense.title.replace(/"/g, '""') + '"';
     csv += `${safeTitle},${expense.category},${expense.date},${expense.amount}\n`;
   });
@@ -113,5 +133,5 @@ exportBtn.addEventListener("click", function () {
   link.click();
 });
 
-// ---------- 7. Load expenses when the page first opens ----------
+// ---------- 9. Load expenses when the page first opens ----------
 loadExpenses();
