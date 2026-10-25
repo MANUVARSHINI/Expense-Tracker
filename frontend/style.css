@@ -79,3 +79,30 @@ td {
 tr:hover {
   background-color: #f9f9f9;
 }
+
+/* ---------- Chart ---------- */
+.chart-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 350px;
+  margin: 20px auto;
+}
+
+/* ---------- Export button ---------- */
+#export-btn {
+  display: block;
+  margin: 0 auto 20px;
+  padding: 10px 20px;
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#export-btn:hover {
+  background-color: #1f6391;
+}

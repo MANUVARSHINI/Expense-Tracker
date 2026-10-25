@@ -1,4 +1,3 @@
-// The address of your Flask server
 const API_URL = "http://127.0.0.1:5000/expenses";
 
 // ---------- 1. Find the elements on the page ----------
@@ -9,16 +8,21 @@ const categoryInput = document.getElementById("category");
 const dateInput = document.getElementById("date");
 const expenseList = document.getElementById("expense-list");
 const totalDisplay = document.getElementById("total");
+const exportBtn = document.getElementById("export-btn");
+
+// These two are used by the chart and the export
+let allExpenses = [];
+let categoryChart = null;
 
 // ---------- 2. Get expenses from the server and show them ----------
 async function loadExpenses() {
   const response = await fetch(API_URL);
-  const expenses = await response.json();
+  allExpenses = await response.json();
 
   expenseList.innerHTML = "";
   let total = 0;
 
-  expenses.forEach(function (expense) {
+  allExpenses.forEach(function (expense) {
     total += expense.amount;
 
     const row = document.createElement("tr");
@@ -33,9 +37,36 @@ async function loadExpenses() {
   });
 
   totalDisplay.textContent = total;
+  drawChart();
 }
 
-// ---------- 3. Send a new expense to the server ----------
+// ---------- 3. Draw the pie chart ----------
+function drawChart() {
+  // Add up the amount for each category
+  const totals = {};
+  allExpenses.forEach(function (expense) {
+    totals[expense.category] = (totals[expense.category] || 0) + expense.amount;
+  });
+
+  // If a chart already exists, remove it before drawing a new one
+  if (categoryChart) {
+    categoryChart.destroy();
+  }
+
+  const canvas = document.getElementById("category-chart");
+  categoryChart = new Chart(canvas, {
+    type: "pie",
+    data: {
+      labels: Object.keys(totals),
+      datasets: [{
+        data: Object.values(totals),
+        backgroundColor: ["#e74c3c", "#3498db", "#f1c40f", "#2ecc71", "#9b59b6"]
+      }]
+    }
+  });
+}
+
+// ---------- 4. Send a new expense to the server ----------
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
@@ -56,11 +87,31 @@ form.addEventListener("submit", async function (event) {
   loadExpenses();
 });
 
-// ---------- 4. Ask the server to delete an expense ----------
+// ---------- 5. Delete an expense ----------
 async function deleteExpense(id) {
   await fetch(API_URL + "/" + id, { method: "DELETE" });
   loadExpenses();
 }
 
-// ---------- 5. Load expenses when the page first opens ----------
+// ---------- 6. Download expenses as a CSV file ----------
+exportBtn.addEventListener("click", function () {
+  if (allExpenses.length === 0) {
+    alert("No expenses to export yet!");
+    return;
+  }
+
+  let csv = "Title,Category,Date,Amount\n";
+  allExpenses.forEach(function (expense) {
+    const safeTitle = '"' + expense.title.replace(/"/g, '""') + '"';
+    csv += `${safeTitle},${expense.category},${expense.date},${expense.amount}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "expenses.csv";
+  link.click();
+});
+
+// ---------- 7. Load expenses when the page first opens ----------
 loadExpenses();

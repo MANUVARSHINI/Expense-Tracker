@@ -30,7 +30,12 @@
 
   <!-- Part 2: Total spent -->
   <h2>Total Spent: ₹<span id="total">0</span></h2>
+    <!-- Chart and export -->
+  <div class="chart-box">
+    <canvas id="category-chart"></canvas>
+  </div>
 
+  <button id="export-btn">Download CSV</button>
   <!-- Part 3: List of expenses -->
   <table>
     <thead>
@@ -46,7 +51,7 @@
       <!-- Expenses will appear here later -->
     </tbody>
   </table>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
